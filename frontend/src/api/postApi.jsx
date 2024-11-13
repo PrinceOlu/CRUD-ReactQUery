@@ -1,6 +1,9 @@
 // Function to fetch all posts
 export const fetchPosts = async () => {
-  const response = await fetch("http://localhost:3000/posts");
+  const response = await fetch('http://localhost:3000/posts'); // Update to match your server URL
+  if (!response.ok) {
+    throw new Error('Failed to fetch posts');
+  }
   return response.json();
 };
 
@@ -20,5 +23,37 @@ export const createPost = async (newPost) => {
   });
   return response.json();
 };
+// Function to update a single post
+export const updatePost = async (updatedPost) => {
+  const response = await fetch(`http://localhost:3000/posts/${updatedPost.id}`, { // Use backticks here
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedPost),
+  });
+  
+  if (!response.ok) {
+    throw new Error("Failed to update post");
+  }
+  
+  return response.json();
+};
 
 
+// Function to delete a post
+export const deletePost = async (id) => {
+  if (!id) {
+    throw new Error("Invalid post ID for deletion")
+  }
+
+  const response = await fetch(`http://localhost:3000/posts/${id}`, {
+    method: "DELETE",
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to delete post")
+  }
+
+  return response.json()
+}

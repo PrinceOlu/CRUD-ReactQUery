@@ -1,48 +1,42 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import { useMutation } from '@tanstack/react-query';
-import { createPost } from '../api/postApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPost } from '../api/postApi';
 
 function AddPost() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState(""); // Ensure content is correctly initialized
+  const [author, setAuthor] = useState("");
 
-  // Handlers for title and content
   const handleTitle = (e) => setTitle(e.target.value);
-  const handleContent = (e) => setContent(e.target.value);
+  const handleAuthor = (e) => setAuthor(e.target.value);
 
-  // Mutation for creating a post
   const createPostMutation = useMutation({
     mutationFn: createPost,
     onSuccess: () => {
-      // Navigate to the home page after post creation
+      // Invalidate and refetch the posts query to update the list
+      queryClient.invalidateQueries(['posts']);
       navigate("/");
     },
   });
 
-  // Function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     handleAddPost();
   };
 
-  // Function to add the post
   const handleAddPost = () => {
     createPostMutation.mutate({
       title,
-      content, // Send content along with title
+      author,
     });
   };
-console.log(title, content);
-
-  return (
+   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
       <div className="card w-100" style={{ maxWidth: '500px' }}>
         <div className="card-body">
           <h4>Add New Post</h4>
-          {/* Form with Bootstrap classes */}
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="title" className="form-label">Title:</label>
@@ -56,12 +50,12 @@ console.log(title, content);
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="content" className="form-label">Content:</label>
+              <label htmlFor="author" className="form-label">Author:</label>
               <textarea
                 className="form-control"
-                id="content"
-                value={content} // Make sure the value is correctly bound
-                onChange={handleContent} // Make sure the handler is correctly updating state
+                id="author"
+                value={author}
+                onChange={handleAuthor}
                 required
               />
             </div>
@@ -69,7 +63,6 @@ console.log(title, content);
               {createPostMutation.isLoading ? 'Adding Post...' : 'Add Post'}
             </button>
           </form>
-          {/* Optionally, show an error message */}
           {createPostMutation.isError && (
             <div className="alert alert-danger mt-3">
               Error: {createPostMutation.error.message}
